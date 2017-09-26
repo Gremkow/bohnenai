@@ -7,10 +7,10 @@ import java.net.URI;
 import ai.BohnenspielAI;
 import utilities.Settings;
 
-/** Au�er dem Attribut ai_name darf an dieser Klasse nichts ver�ndert werden. */
+/** Ausser dem Attribut ai_name darf an dieser Klasse nichts veraendert werden. */
 public class GameClient {
 
-	private static String ai_name = "Enter your name here!"; //TODO
+	private static String ai_name = "Bean me up Scottie";
 	private String gameID;
 	private BohnenspielAI ai;
 
@@ -19,7 +19,7 @@ public class GameClient {
 			System.out.println("Name: " + ai_name);
 			InputStreamReader isr = new InputStreamReader(System.in);
 			BufferedReader br = new BufferedReader(isr);
-			System.out.print("Spielnummer eingeben (0 f�r neues Spiel): ");
+			System.out.print("Spielnummer eingeben (0 fuer neues Spiel): ");
 			String eingabe = br.readLine();
 			int playMode = Integer.parseInt(eingabe);
 			
