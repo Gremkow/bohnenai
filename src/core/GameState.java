@@ -39,7 +39,7 @@ public class GameState {
       }
       houses[index] = 0;
       //Check if someone gets beans
-      processPoint(player);
+      processPoint(player, index);
     }
     return;
   }
@@ -48,17 +48,34 @@ public class GameState {
    * Checks if a player has scored, removes seeds from houses and adds them to players store
    * @param player true = we, false = enemy
    */
-  public void processPoint(boolean player) {
+  public void processPoint(boolean player, byte index) {
     byte owned = 0;
     
     //TODO check if player scored somewhere, remove those seeds and add them to owned variable.
+    int i = index;
+    int count = 0;
+    int selectedHouse = houses[index];
     
-    if(player) {
-      mystore += owned;
-    } else {
-      enemystore += owned;
+    while(selectedHouse != 0){
+    	count++;
+    	houses[(++i)%12]++;
+    	selectedHouse--;
     }
+    while( count != 0 && (houses[i%12] == 2 || houses[i%12] == 4 || houses[i%12] == 6)){
+    	
+    	owned += houses[i%12];
+    	count--;
+    	
+    	 if(player) {
+    		 mystore += owned;
+    	 	} else {
+    	 	enemystore += owned;
+    	 	}
+    	 i--;
+    }
+   
   }
+  
   
   /**
    * Method to asses this state wrt the heuristic. Has to return Integer.MAX_VALUE if this is a win for us
