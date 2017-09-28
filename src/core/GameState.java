@@ -37,6 +37,9 @@ public class GameState {
     return;
   }
   
+  public int assessment() {
+    return 0;
+  }
   
   // -------- GETTERS ---------
   
