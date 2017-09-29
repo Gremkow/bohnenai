@@ -33,10 +33,14 @@ public class GameState {
   public void doMove(byte index) {
     boolean inRow = true; //If this is true, a house with 2, 4 or 6 seeds will be collected
     byte owned = 0;
+    byte distSeeds;
+    boolean player = (index <= 6);
     
     if(index >= 1 && index <= 12) {
       index--;
-      for (int i = index + houses[index]; i >= index + 1; i--) { //start from last index for easier point checking
+      distSeeds = houses[index];
+      houses[index] = 0;
+      for (int i = index + distSeeds; i >= index + 1; i--) { //start from last index for easier point checking
         byte localIndex = (byte)(i % 12); //avoid multiple calculation
         houses[localIndex]++;
         //Check for points
@@ -47,8 +51,11 @@ public class GameState {
           inRow = false;
         }
       }
-      houses[index] = 0;
-      if(index <= 6) {
+      //Get all foreign seed if all houses empty
+      if(noMovePossible(player)){
+        owned += popSeeds(!player);
+      }
+      if(player) {
         mystore += owned;
        } else {
        enemystore += owned;
@@ -66,7 +73,12 @@ public class GameState {
   public int assessment() {
     //simplest heuristic.. 
     //TODO change to real heuristic
-    return mystore;
+    if (mystore >= 37) {
+      return Integer.MAX_VALUE;
+    } else if (enemystore >= 37) {
+      return Integer.MIN_VALUE;
+    }
+    return mystore-enemystore;
   }
   
   // -------- GETTERS ---------
@@ -84,6 +96,49 @@ public class GameState {
   
   public byte getEnemyStore() {
     return enemystore;
+  }
+  
+  /**
+   * Get all seed on one side and removes them from the houses
+   * 
+   * @param player true=we, false=enemy
+   * @return true if a move is possible, false otherwise
+   */
+  public byte popSeeds(boolean player){
+    byte tmp;
+    if(player) {
+      tmp = (byte) (houses[0] + houses[1] + houses[2] + houses[3] + houses[4] + houses[5]);
+      houses[0] = 0;
+      houses[1] = 0;
+      houses[2] = 0;
+      houses[3] = 0;
+      houses[4] = 0;
+      houses[5] = 0;
+      return tmp;
+    } else {
+      tmp = (byte) (houses[6] + houses[7] + houses[8] + houses[9] + houses[10] + houses[11]);
+      houses[6] = 0;
+      houses[7] = 0;
+      houses[8] = 0;
+      houses[9] = 0;
+      houses[10] = 0;
+      houses[11] = 0;
+      return tmp;
+    }
+  }
+  
+  /**
+   * Check if player can do a move
+   * 
+   * @param player true=we, false=enemy
+   * @return true if a move is possible, false otherwise
+   */
+  public boolean noMovePossible(boolean player){
+    if(player) {
+      return (houses[0] + houses[1] + houses[2] + houses[3] + houses[4] + houses[5]) == 0;
+    } else {
+      return (houses[6] + houses[7] + houses[8] + houses[9] + houses[10] + houses[11]) == 0;
+    }
   }
   
   @Override
