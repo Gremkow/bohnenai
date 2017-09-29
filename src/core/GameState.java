@@ -28,54 +28,34 @@ public class GameState {
   
   /**
    * Distributes all seeds from index, counterclockwise
-   * @param player true = we, false = enemy
    * @param index the index from where to take seeds
    */
-  public void doMove(boolean player, byte index) {
+  public void doMove(byte index) {
+    boolean inRow = true; //If this is true, a house with 2, 4 or 6 seeds will be collected
+    byte owned = 0;
+    
     if(index >= 1 && index <= 12) {
       index--;
-      for (int i = index + 1; i <= index + houses[index]; i++) {
-        houses[(i % 12)]++;
+      for (int i = index + houses[index]; i >= index + 1; i--) { //start from last index for easier point checking
+        byte localIndex = (byte)(i % 12); //avoid multiple calculation
+        houses[localIndex]++;
+        //Check for points
+        if(inRow && (houses[localIndex] == 2 || houses[localIndex] == 4 || houses[localIndex] == 6)){
+          owned += houses[localIndex];
+          houses[localIndex] = 0;
+        } else {
+          inRow = false;
+        }
       }
       houses[index] = 0;
-      //Check if someone gets beans
-      processPoint(player, index);
+      if(index <= 6) {
+        mystore += owned;
+       } else {
+       enemystore += owned;
+       }
     }
     return;
   }
-  
-  /**
-   * Checks if a player has scored, removes seeds from houses and adds them to players store
-   * @param player true = we, false = enemy
-   */
-  public void processPoint(boolean player, byte index) {
-    byte owned = 0;
-    
-    //TODO check if player scored somewhere, remove those seeds and add them to owned variable.
-    int i = index;
-    int count = 0;
-    int selectedHouse = houses[index];
-    
-    while(selectedHouse != 0){
-    	count++;
-    	houses[(++i)%12]++;
-    	selectedHouse--;
-    }
-    while( count != 0 && (houses[i%12] == 2 || houses[i%12] == 4 || houses[i%12] == 6)){
-    	
-    	owned += houses[i%12];
-    	count--;
-    	
-    	 if(player) {
-    		 mystore += owned;
-    	 	} else {
-    	 	enemystore += owned;
-    	 	}
-    	 i--;
-    }
-   
-  }
-  
   
   /**
    * Method to asses this state wrt the heuristic. Has to return Integer.MAX_VALUE if this is a win for us
@@ -109,6 +89,16 @@ public class GameState {
   @Override
   public GameState clone() {
     return new GameState(this);
+  }
+  
+  @Override
+  public String toString() {
+    String ret = "";
+    ret += houses[11] + "|" + houses[10] + "|" + houses[9] + "|" + houses[8] + "|" + houses[7] + "|" + houses[6] + "\n";
+    ret += houses[0] + "|" + houses[1] + "|" + houses[2] + "|" + houses[3] + "|" + houses[4] + "|" + houses[5]+ "\n";
+    ret += "My score: " + mystore + "\n";
+    ret += "Enemy score " + enemystore;
+    return ret;
   }
 
 }

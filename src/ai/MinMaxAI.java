@@ -22,7 +22,7 @@ public class MinMaxAI {
        return 1; //return sth. between 1 and 6
      }
      //Execute enemy's move
-     state.doMove(false, (byte)enemyIndex); //enemy's move
+     state.doMove((byte)(enemyIndex + offset)); //enemy's move
      
      //start calculating own move
      return calculateMove(state.clone(), 5) + offset;
@@ -53,7 +53,7 @@ public class MinMaxAI {
        if(aiState.getSeedsInHouse(i) == 0) continue; //No move possible
        //do move
        GameState move = aiState.clone();
-       move.doMove(true,i); //we do the move
+       move.doMove(i); //we do the move
        //other player
        int value = min(move, currDepth - 1, desiredDepth);
        if (value > max) {
@@ -75,7 +75,7 @@ public class MinMaxAI {
        if(aiState.getSeedsInHouse(i) == 0) continue; //No move possible
        //do move
        GameState move = aiState.clone();
-       move.doMove(false, i); //enemy does the move
+       move.doMove(i); //enemy does the move
        //other player
        int value = max(move, currDepth - 1, desiredDepth);
        if (value < min) {

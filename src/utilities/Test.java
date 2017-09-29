@@ -1,6 +1,7 @@
 package utilities;
 
 import ai.MinMaxAI;
+import core.GameState;
 
 public class Test {
 
@@ -9,8 +10,13 @@ public class Test {
   }
 
   public static void main(String[] args) {
-    MinMaxAI minMax = new MinMaxAI();
-    System.out.println(minMax.getMove(1));
+    GameState state = new GameState((byte)6);
+    state.doMove((byte)1);
+    System.err.println(state);
+    state.doMove((byte)12);
+    System.err.println(state);
+    state.doMove((byte)5);
+    System.err.println(state);
   }
 
 }
