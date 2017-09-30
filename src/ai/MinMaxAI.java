@@ -26,6 +26,7 @@ public class MinMaxAI implements I_AI {
 
      // have to choose the first move
      if (enemyIndex == -1) {
+       state.doMove((byte)1);
        return 1; //return sth. between 1 and 6
      }
      //Execute enemy's move
@@ -51,20 +52,30 @@ public class MinMaxAI implements I_AI {
     */
    private byte calculateMove(GameState startState) {
      //start calculation
+     nextMove = 0;
      max(startState, desiredDepth);
+     
+     if(nextMove == 0)
+      try {
+        throw new Exception("No move found");
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
      
      return nextMove;
    }
   
    private int max(GameState aiState, int currDepth) {
-     if(currDepth == 0) return aiState.assessment(); // last stage
+     if(currDepth == 0 || aiState.noMovePossible(true)) return aiState.assessment(); // last stage
      
      int max = Integer.MIN_VALUE; //init max value
-     boolean changed = false;
-     
+
      //Check each move
      for(byte i = 1; i <= 6; i++) {
-       if(aiState.getSeedsInHouse(i) == 0) continue; //No move possible
+       if(aiState.getSeedsInHouse(i) == 0){
+         if (currDepth == desiredDepth) System.out.println("no move poss: " + i);
+         continue; //No move possible
+       }
        //do move
        GameState move = aiState.clone();
        move.doMove(i); //we do the move
@@ -72,23 +83,23 @@ public class MinMaxAI implements I_AI {
        int value = min(move, currDepth - 1);
        if (value > max) {
          max = value;
-         changed = true;
          if (currDepth == desiredDepth);
             nextMove = i;
          }
      }
-     return (changed) ? max : aiState.assessment(); //return max only if a move was done
+     return max;
    }
    
    private int min(GameState aiState, int currDepth) {
-     if(currDepth == 0) return aiState.assessment(); // last stage
+     if(currDepth == 0 || aiState.noMovePossible(false)) return aiState.assessment(); // last stage
      
      int min = Integer.MAX_VALUE; //init max value
-     boolean changed = false;
-     
+
      //Check each move
      for(byte i = 7; i <= 12; i++) {
-       if(aiState.getSeedsInHouse(i) == 0) continue; //No move possible
+       if(aiState.getSeedsInHouse(i) == 0){
+         continue; //No move possible
+       }
        //do move
        GameState move = aiState.clone();
        move.doMove(i); //enemy does the move
@@ -96,11 +107,9 @@ public class MinMaxAI implements I_AI {
        int value = max(move, currDepth - 1);
        if (value < min) {
          min = value;
-         changed = true;
        }  
      }
-     //No move possible (all 0)
-     return (changed) ? min : aiState.assessment(); //return min only if a move was done
+     return min;
    }
 
 }
