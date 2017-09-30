@@ -10,7 +10,7 @@ import utilities.Settings;
 /** Ausser dem Attribut ai_name darf an dieser Klasse nichts veraendert werden. */
 public class GameClient {
 
-	private static String ai_name = "Bean me up Scottie";
+	private static String ai_name = "Bean Me Up Scottie";
 	private String gameID;
 	private BohnenspielAI ai;
 
