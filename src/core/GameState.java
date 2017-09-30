@@ -31,6 +31,9 @@ public class GameState {
    * @param index the index from where to take seeds
    */
   public void doMove(byte index) {
+    
+    //TODO: Bug, if a field gets filled twice in one move
+    
     boolean inRow = true; //If this is true, a house with 2, 4 or 6 seeds will be collected
     byte owned = 0;
     byte distSeeds;
