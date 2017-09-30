@@ -5,7 +5,7 @@ import java.time.Instant;
 
 import core.GameState;
 
-public class AlphaBetaAI implements I_AI{
+public class AlphaBetaAI implements I_AI {
 
   GameState state;
   byte nextMove;
@@ -17,12 +17,9 @@ public class AlphaBetaAI implements I_AI{
   }
 
   /**
-   * @param enemyIndex
-   *          The index that refers to the field chosen by the enemy in the last
-   *          action.If this value is -1, than the AI is the starting player and
-   *          has to specify the first move.
-   * @return Return The index that refers to the field of the action chosen by
-   *         this AI.
+   * @param enemyIndex The index that refers to the field chosen by the enemy in the last action.If
+   * this value is -1, than the AI is the starting player and has to specify the first move.
+   * @return Return The index that refers to the field of the action chosen by this AI.
    */
   public int getMove(int enemyIndex) {
     Instant start = Instant.now();
@@ -46,13 +43,10 @@ public class AlphaBetaAI implements I_AI{
 
   /**
    * Calculates next index (move)
-   * 
-   * @param aiState
-   *          last state
-   * @param player
-   *          false=me, true=enemy
-   * @param depth
-   *          maximum search depth
+   *
+   * @param aiState last state
+   * @param player false=me, true=enemy
+   * @param depth maximum search depth
    * @return index of next move
    */
   private byte calculateMove(GameState startState) {
@@ -63,16 +57,18 @@ public class AlphaBetaAI implements I_AI{
   }
 
   private int max(GameState aiState, int alpha, int beta, int currDepth) {
-    if (currDepth == 0)
+    if (currDepth == 0) {
       return aiState.assessment(); // last stage
+    }
 
     int max = alpha; // init max value
     boolean changed = false;
 
     // Check each move
     for (byte i = 1; i <= 6; i++) {
-      if (aiState.getSeedsInHouse(i) == 0)
+      if (aiState.getSeedsInHouse(i) == 0) {
         continue; // No move possible
+      }
       // do move
       GameState move = aiState.clone();
       move.doMove(i); // we do the move
@@ -81,7 +77,7 @@ public class AlphaBetaAI implements I_AI{
       if (value > max) {
         max = value;
         changed = true;
-        if (currDepth == desiredDepth){
+        if (currDepth == desiredDepth) {
           nextMove = i;
         }
         if (max >= beta) {
@@ -93,16 +89,18 @@ public class AlphaBetaAI implements I_AI{
   }
 
   private int min(GameState aiState, int alpha, int beta, int currDepth) {
-    if (currDepth == 0)
+    if (currDepth == 0) {
       return aiState.assessment(); // last stage
+    }
 
     int min = beta; // init max value
     boolean changed = false;
 
     // Check each move
     for (byte i = 7; i <= 12; i++) {
-      if (aiState.getSeedsInHouse(i) == 0)
+      if (aiState.getSeedsInHouse(i) == 0) {
         continue; // No move possible
+      }
       // do move
       GameState move = aiState.clone();
       move.doMove(i); // enemy does the move
