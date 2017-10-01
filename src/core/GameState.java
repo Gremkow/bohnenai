@@ -31,34 +31,43 @@ public class GameState {
    * @param index the index from where to take seeds
    */
   public void doMove(byte index) {
-    byte seedsGained = 0;
-    int i = index + 240;
-    int seedsToDistribute = houses[index - 1];
-    int originalSeedCount = seedsToDistribute;
 
-    // distributes seeds
-    houses[index % 12] = 0;
-    while (seedsToDistribute != 0) {
-      houses[--i % 12]++;
-      seedsToDistribute--;
+    //TODO: Bug, if a field gets filled twice in one move
+
+    boolean inRow = true; //If this is true, a house with 2, 4 or 6 seeds will be collected
+    byte owned = 0;
+    byte distSeeds;
+    boolean player = (index <= 6);
+
+    if (index >= 1 && index <= 12) {
+      index--;
+      distSeeds = houses[index];
+      houses[index] = 0;
+      for (int i = index + distSeeds; i >= index + 1;
+          i--) { //start from last index for easier point checking
+        byte localIndex = (byte) (i % 12); //avoid multiple calculation
+        houses[localIndex]++;
+        //Check for points
+        if (inRow && (houses[localIndex] == 2 || houses[localIndex] == 4
+            || houses[localIndex] == 6)) {
+          owned += houses[localIndex];
+          houses[localIndex] = 0;
+        } else {
+          inRow = false;
+        }
+      }
+      //Get all foreign seed if all houses empty
+      if (noMovePossible(player)) {
+        owned += popSeeds(!player);
+      }
+      if (player) {
+        mystore += owned;
+      } else {
+        enemystore += owned;
+      }
     }
-
-    // checks if move scored
-    while (originalSeedCount != 0 && (houses[i % 12] == 2 || houses[i % 12] == 4
-        || houses[i % 12] == 6)) {
-
-      seedsGained += houses[i];
-      originalSeedCount--;
-      i--;
-    }
-    if (i <= 6) {
-      mystore += seedsGained;
-    } else {
-      enemystore += seedsGained;
-    }
-
+    return;
   }
-
 
   /**
    * Method to asses this state wrt the heuristic. Has to return Integer.MAX_VALUE if this is a win
