@@ -31,42 +31,41 @@ public class GameState {
    * @param index the index from where to take seeds
    */
   public void doMove(byte index) {
-
-    //TODO: Bug, if a field gets filled twice in one move
-
-    boolean inRow = true; //If this is true, a house with 2, 4 or 6 seeds will be collected
-    byte owned = 0;
-    byte distSeeds;
-    boolean player = (index <= 6);
-
     if (index >= 1 && index <= 12) {
-      index--;
-      distSeeds = houses[index];
-      houses[index] = 0;
-      for (int i = index + distSeeds; i >= index + 1;
-          i--) { //start from last index for easier point checking
-        byte localIndex = (byte) (i % 12); //avoid multiple calculation
-        houses[localIndex]++;
-        //Check for points
-        if (inRow && (houses[localIndex] == 2 || houses[localIndex] == 4
-            || houses[localIndex] == 6)) {
-          owned += houses[localIndex];
-          houses[localIndex] = 0;
-        } else {
-          inRow = false;
+      boolean player;
+      byte seedsGained = 0;
+      int i = (index % 12);
+      int seedsToDistribute = houses[(index) % 12];
+      int originalSeedCount = seedsToDistribute;
+
+      player = i > 5 ? false : true;
+
+      houses[i] = 0;
+      // distributes seeds
+      while (seedsToDistribute != 0) {
+        if(i == 0) {
+          i = 12;
         }
+        houses[--i]++;
+        seedsToDistribute--;
       }
-      //Get all foreign seed if all houses empty
-      if (noMovePossible(player)) {
-        owned += popSeeds(!player);
+
+      //collecting scored seeds
+      while (originalSeedCount != 0 && (houses[i % 12] == 2 || houses[i % 12] == 4
+          || houses[i % 12] == 6)) {
+
+        seedsGained += houses[i % 12];
+        houses[i%12] = 0;
+        originalSeedCount--;
+        i--;
       }
       if (player) {
-        mystore += owned;
+        mystore += seedsGained;
       } else {
-        enemystore += owned;
+        enemystore += seedsGained;
       }
     }
-    return;
+
   }
 
   /**

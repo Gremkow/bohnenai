@@ -17,6 +17,10 @@ public class Test {
     System.err.println(state);
     state.doMove((byte)5);
     System.err.println(state);
+    state.doMove((byte)4);
+    System.err.println(state);
+    state.doMove((byte)3);
+    System.err.println(state);
   }
 
 }
