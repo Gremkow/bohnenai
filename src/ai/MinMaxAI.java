@@ -33,14 +33,14 @@ public class MinMaxAI implements I_AI {
     }
     //Execute enemy's move
     state.doMove((byte) (enemyIndex + offset)); //enemy's move
-    System.out.println("Before:\n" + state);
+    //System.out.println("Before:\n" + state);
 
     //start calculating own move
     byte move = calculateMove(state.clone());
     state.doMove(move);
     Instant stop = Instant.now();
     System.out.println(Duration.between(start, stop) + " --> " + (move + offset));
-    System.out.println("After:\n" + state);
+    //System.out.println("After:\n" + state);
     return move + offset;
   }
 
@@ -78,9 +78,6 @@ public class MinMaxAI implements I_AI {
     //Check each move
     for (byte i = 1; i <= 6; i++) {
       if (aiState.getSeedsInHouse(i) == 0) {
-        if (currDepth == desiredDepth) {
-          System.out.println("no move poss: " + i);
-        }
         continue; //No move possible
       }
       //do move
@@ -91,9 +88,8 @@ public class MinMaxAI implements I_AI {
       if (value > max) {
         max = value;
         if (currDepth == desiredDepth) {
-          ;
+          nextMove = i;
         }
-        nextMove = i;
       }
     }
     return max;

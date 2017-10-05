@@ -13,7 +13,7 @@ public class AlphaBetaAI implements I_AI {
 
   public AlphaBetaAI() {
     this.state = new GameState((byte) 6);
-    desiredDepth = 5;
+    desiredDepth = 15;
   }
 
   /**
@@ -28,16 +28,19 @@ public class AlphaBetaAI implements I_AI {
 
     // have to choose the first move
     if (enemyIndex == -1) {
-      return 1; // return sth. between 1 and 6
+      state.doMove((byte) 1);
+      return 1; //return sth. between 1 and 6
     }
-    // Execute enemy's move
-    state.doMove((byte) (enemyIndex + offset)); // enemy's move
+    //Execute enemy's move
+    state.doMove((byte) (enemyIndex + offset)); //enemy's move
+    //System.out.println("Before:\n" + state);
 
-    // start calculating own move
+    //start calculating own move
     byte move = calculateMove(state.clone());
     state.doMove(move);
     Instant stop = Instant.now();
-    System.out.println(Duration.between(start, stop) + " --> " + move);
+    System.out.println(Duration.between(start, stop) + " --> " + (move + offset));
+    //System.out.println("After:\n" + state);
     return move + offset;
   }
 
@@ -50,19 +53,27 @@ public class AlphaBetaAI implements I_AI {
    * @return index of next move
    */
   private byte calculateMove(GameState startState) {
-    // start calculation
+  //start calculation
+    nextMove = 0;
     max(startState, Integer.MIN_VALUE, Integer.MAX_VALUE, desiredDepth);
+
+    if (nextMove == 0) {
+      try {
+        throw new Exception("No move found");
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
 
     return nextMove;
   }
 
   private int max(GameState aiState, int alpha, int beta, int currDepth) {
-    if (currDepth == 0) {
+    if (currDepth == 0 || aiState.noMovePossible(true)) {
       return aiState.assessment(); // last stage
     }
 
     int max = alpha; // init max value
-    boolean changed = false;
 
     // Check each move
     for (byte i = 1; i <= 6; i++) {
@@ -76,7 +87,6 @@ public class AlphaBetaAI implements I_AI {
       int value = min(move, max, beta, currDepth - 1);
       if (value > max) {
         max = value;
-        changed = true;
         if (currDepth == desiredDepth) {
           nextMove = i;
         }
@@ -85,16 +95,15 @@ public class AlphaBetaAI implements I_AI {
         }
       }
     }
-    return (changed) ? max : aiState.assessment(); // return max only if a move was done
+    return max; // return max only if a move was done
   }
 
   private int min(GameState aiState, int alpha, int beta, int currDepth) {
-    if (currDepth == 0) {
+    if (currDepth == 0 || aiState.noMovePossible(false)) {
       return aiState.assessment(); // last stage
     }
 
     int min = beta; // init max value
-    boolean changed = false;
 
     // Check each move
     for (byte i = 7; i <= 12; i++) {
@@ -108,14 +117,13 @@ public class AlphaBetaAI implements I_AI {
       int value = max(move, alpha, min, currDepth - 1);
       if (value < min) {
         min = value;
-        changed = true;
         if (min <= alpha) {
           break;
         }
       }
     }
     // No move possible (all 0)
-    return (changed) ? min : aiState.assessment(); // return min only if a move was done
+    return min; // return min only if a move was done
   }
 
 }
