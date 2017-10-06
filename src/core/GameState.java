@@ -7,14 +7,14 @@ public class GameState {
   byte[] houses;
   byte mystore;
   byte enemystore;
-  int moveCount;
+  boolean endState = false;
+  boolean player;
 
   public GameState(byte seedcount) {
     seedcount = (byte) Math.min(21, seedcount); // Because 12 * 22 > 255
     houses = new byte[12];
     mystore = 0;
     enemystore = 0;
-    moveCount = 0;
 
     Arrays.fill(houses, seedcount);
   }
@@ -23,7 +23,6 @@ public class GameState {
     houses = source.houses.clone();
     mystore = source.mystore;
     enemystore = source.enemystore;
-    moveCount = source.moveCount;
   }
 
   // ------- FUNCTIONS --------
@@ -35,47 +34,68 @@ public class GameState {
    */
   public void doMove(byte index) {
     if (index >= 1 && index <= 12) {
-      boolean player = (index > 6) ? false : true;
       byte seedsGained = 0;
-      int i = index - 1;
-      int seedsToDistribute = houses[index - 1];
+      int i = (index % 12);
+      int seedsToDistribute = houses[(index) % 12];
+      int originalSeedCount = seedsToDistribute;
+
+      player = i > 5 ? false : true;
 
       houses[i] = 0;
       // distributes seeds
       while (seedsToDistribute != 0) {
-        houses[++i % 12]++;
+        if(i == 0) {
+          i = 12;
+        }
+        houses[--i]++;
         seedsToDistribute--;
       }
-      
-      i = i % 12;
-      
+
       //collecting scored seeds
-      while ((houses[i] == 2 || houses[i] == 4 || houses[i] == 6)) {
-        seedsGained += houses[i];
-        houses[i] = 0;
-        int mod = --i % 12;
-        i = (mod) < 0 ? i + 12 : mod;
+      while (originalSeedCount != 0 && (houses[i % 12] == 2 || houses[i % 12] == 4
+          || houses[i % 12] == 6)) {
+
+        seedsGained += houses[i % 12];
+        houses[i%12] = 0;
+        originalSeedCount--;
+        i--;
       }
-      
-      //check for 0 seeds on own user
-      if(noMovePossible(true)){
-        //enemy gets all seeds on his side
-        enemystore += popSeeds(false);
-      } else if (noMovePossible(false)) {
-        //we get all seeds on our side
-        mystore += popSeeds(true);
-      }
-    
       if (player) {
         mystore += seedsGained;
       } else {
         enemystore += seedsGained;
       }
-      
-      this.moveCount++;
     }
 
   }
+  /**
+   * Checks if game is finished.
+   */
+  private void checkIfEndState() {
+		
+		if(!player)
+		{
+			for(int i = 0; i < 6; i++)
+			{
+				if(houses[i] != 0)
+				{
+					return;
+				}
+			}
+			endState = true;
+		}
+		else{
+			for(int i = 6; i < 12; i++)
+			{
+				if(houses[i] != 0)
+				{
+					return;
+				}
+			}
+			endState = true;
+		}
+		
+	}
 
   /**
    * Method to asses this state wrt the heuristic. Has to return Integer.MAX_VALUE if this is a win
@@ -86,13 +106,26 @@ public class GameState {
   public int assessment() {
     //simplest heuristic.. 
     //TODO change to real heuristic
-    if (mystore >= 37) {
-      return Integer.MAX_VALUE - moveCount;
-    } else if (enemystore >= 37) {
-      return Integer.MIN_VALUE + moveCount;
-    }
-    return mystore - enemystore;
-  }
+//    if (mystore >= 37) {
+//      return Integer.MAX_VALUE;
+//    } else if (enemystore >= 37) {
+//      return Integer.MIN_VALUE;
+//    }
+//    return mystore - enemystore;
+//  }
+	  checkIfEndState();
+	  if(endState){
+		  int tmp = 0;
+		  for(int i = 0; i < 6; i++){
+			  tmp += houses[i];
+		  }
+		  if(!player) mystore+=tmp;
+		  else enemystore+=tmp;
+	  }
+	  if(!player) return mystore-enemystore;
+	  else return enemystore-mystore;
+  } 
+  
 
   // -------- GETTERS ---------
 
