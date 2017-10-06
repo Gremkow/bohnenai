@@ -91,7 +91,13 @@ public class GameState {
     } else if (enemystore >= 37) {
       return Integer.MIN_VALUE + moveCount;
     }
-    return mystore - enemystore;
+    int enemyZeroAmount = 0; // amount of enemy houses == 0
+    for(int i = 6; i < houses.length; i++){
+      if (houses[i] == 0){
+        enemyZeroAmount++;
+      }
+    }
+    return (enemyZeroAmount + 2*(mystore - enemystore));
   }
 
   // -------- GETTERS ---------
