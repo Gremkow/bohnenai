@@ -26,15 +26,13 @@ public class MinMaxAI implements I_AI {
 
     int offset = (enemyIndex > 0 && enemyIndex <= 6) ? 6 : 0;
 
-    // have to choose the first move
-    if (enemyIndex == -1) {
-      state.doMove((byte) 1);
-      return 1; //return sth. between 1 and 6
+    // not first move --> execute
+    if (enemyIndex != -1) {
+      //Execute enemy's move
+      state.doMove((byte) (enemyIndex + offset)); //enemy's move
     }
-    //Execute enemy's move
-    state.doMove((byte) (enemyIndex + offset)); //enemy's move
     //System.out.println("Before:\n" + state);
-
+    
     //start calculating own move
     byte move = calculateMove(state.clone());
     state.doMove(move);
