@@ -58,12 +58,13 @@ public class GameState {
       }
       
       //check for 0 seeds on own user
-      if(noMovePossible(true)){
+      if(noMovePossible(!player)){
         //enemy gets all seeds on his side
-        enemystore += popSeeds(false);
-      } else if (noMovePossible(false)) {
-        //we get all seeds on our side
-        mystore += popSeeds(true);
+        if(!player) {
+          enemystore += popSeeds(false);
+        } else {
+          mystore += popSeeds(true);
+        }
       }
     
       if (player) {
