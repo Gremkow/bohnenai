@@ -2,6 +2,11 @@ package ai;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import core.GameState;
 
@@ -13,7 +18,7 @@ public class OptAlphaBetaAI implements I_AI {
 
   public OptAlphaBetaAI() {
     this.state = new GameState((byte) 6);
-    desiredDepth = 15;
+    desiredDepth = 13;
   }
 
   /**
@@ -39,7 +44,7 @@ public class OptAlphaBetaAI implements I_AI {
     byte move = calculateMove(state.clone());
     state.doMove(move);
     Instant stop = Instant.now();
-    System.out.println(Duration.between(start, stop) + " --> " + (move + offset));
+    System.out.println("OptAB: " + Duration.between(start, stop) + " --> " + (move + offset));
     //System.out.println("After:\n" + state);
     return move + offset;
   }
@@ -76,19 +81,19 @@ public class OptAlphaBetaAI implements I_AI {
     int max = alpha; // init max value
 
     // Check each move
-    for (byte i = 1; i <= 6; i++) {
-      if (aiState.getSeedsInHouse(i) == 0) {
+    for (Entry<Byte, Integer> entry : getMovesOrdered(aiState, 0).entrySet()) {
+      if (aiState.getSeedsInHouse(entry.getKey()) == 0) {
         continue; // No move possible
       }
       // do move
       GameState move = aiState.clone();
-      move.doMove(i); // we do the move
+      move.doMove(entry.getKey()); // we do the move
       // other player
       int value = min(move, max, beta, currDepth - 1);
       if (value > max) {
         max = value;
         if (currDepth == desiredDepth) {
-          nextMove = i;
+          nextMove = entry.getKey();
         }
         if (max >= beta) {
           break;
@@ -106,13 +111,13 @@ public class OptAlphaBetaAI implements I_AI {
     int min = beta; // init max value
 
     // Check each move
-    for (byte i = 7; i <= 12; i++) {
-      if (aiState.getSeedsInHouse(i) == 0) {
+    for (Entry<Byte, Integer> entry : getMovesOrdered(aiState, 7).entrySet()) {
+      if (aiState.getSeedsInHouse(entry.getKey()) == 0) {
         continue; // No move possible
       }
       // do move
       GameState move = aiState.clone();
-      move.doMove(i); // enemy does the move
+      move.doMove(entry.getKey()); // enemy does the move
       // other player
       int value = max(move, alpha, min, currDepth - 1);
       if (value < min) {
@@ -125,5 +130,82 @@ public class OptAlphaBetaAI implements I_AI {
     // No move possible (all 0)
     return min; // return min only if a move was done
   }
+  
+  /**
+   * Pre assess moves
+   * 
+   * @param currState
+   * @param start
+   * @return
+   */
+  private Map<Byte, Integer> getMovesOrdered(GameState currState, int start){
+    Map<Byte, Integer> assesed = new HashMap<Byte, Integer>();
+    
+    for(int i = start; i < start + 6; i++){
+      assesed.put((byte)i, preMax(currState, Integer.MIN_VALUE, Integer.MAX_VALUE, 2));
+    }
+            
+    return assesed.entrySet().stream()
+        .sorted(Map.Entry.<Byte, Integer>comparingByValue().reversed())
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+  }
 
+  private int preMax(GameState aiState, int alpha, int beta, int currDepth) {
+    if (currDepth == 0 || aiState.noMovePossible(true)) {
+      return aiState.assessment(); // last stage
+    }
+
+    int max = alpha; // init max value
+
+    // Check each move
+    for (byte i = 1; i <= 6; i++) {
+      if (aiState.getSeedsInHouse(i) == 0) {
+        continue; // No move possible
+      }
+      // do move
+      GameState move = aiState.clone();
+      move.doMove(i); // we do the move
+      // other player
+      int value = preMin(move, max, beta, currDepth - 1);
+      if (value > max) {
+        max = value;
+        if (currDepth == desiredDepth) {
+          nextMove = i;
+        }
+        if (max >= beta) {
+          break;
+        }
+      }
+    }
+    return max; // return max only if a move was done
+  }
+
+  private int preMin(GameState aiState, int alpha, int beta, int currDepth) {
+    if (currDepth == 0 || aiState.noMovePossible(false)) {
+      return aiState.assessment(); // last stage
+    }
+
+    int min = beta; // init max value
+
+    // Check each move
+    for (byte i = 7; i <= 12; i++) {
+      if (aiState.getSeedsInHouse(i) == 0) {
+        continue; // No move possible
+      }
+      // do move
+      GameState move = aiState.clone();
+      move.doMove(i); // enemy does the move
+      // other player
+      int value = preMax(move, alpha, min, currDepth - 1);
+      if (value < min) {
+        min = value;
+        if (min <= alpha) {
+          break;
+        }
+      }
+    }
+    // No move possible (all 0)
+    return min; // return min only if a move was done
+  }
+  
 }
