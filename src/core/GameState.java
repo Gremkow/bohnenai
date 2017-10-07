@@ -46,9 +46,9 @@ public class GameState {
         houses[++i % 12]++;
         seedsToDistribute--;
       }
-      
+
       i = i % 12;
-      
+
       //collecting scored seeds
       while ((houses[i] == 2 || houses[i] == 4 || houses[i] == 6)) {
         seedsGained += houses[i];
@@ -56,23 +56,23 @@ public class GameState {
         int mod = --i % 12;
         i = (mod) < 0 ? i + 12 : mod;
       }
-      
+
       //check for 0 seeds on own user
-      if(noMovePossible(!player)){
+      if (noMovePossible(!player)) {
         //enemy gets all seeds on his side
-        if(!player) {
+        if (!player) {
           enemystore += popSeeds(false);
         } else {
           mystore += popSeeds(true);
         }
       }
-    
+
       if (player) {
         mystore += seedsGained;
       } else {
         enemystore += seedsGained;
       }
-      
+
       this.moveCount++;
     }
 
@@ -85,20 +85,12 @@ public class GameState {
    * @return assesment of this state wrt heuristic
    */
   public int assessment() {
-    //simplest heuristic.. 
-    //TODO change to real heuristic
     if (mystore >= 37) {
       return Integer.MAX_VALUE - moveCount;
     } else if (enemystore >= 37) {
       return Integer.MIN_VALUE + moveCount;
     }
-    int enemyZeroAmount = 0; // amount of enemy houses == 0
-    for(int i = 6; i < houses.length; i++){
-      if (houses[i] == 0){
-        enemyZeroAmount++;
-      }
-    }
-    return (enemyZeroAmount + 2*(mystore - enemystore));
+    return mystore - enemystore;
   }
 
   // -------- GETTERS ---------
